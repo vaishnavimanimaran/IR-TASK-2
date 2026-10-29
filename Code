@@ -1,0 +1,122 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
+
+# ======================================================================
+# 1. LOAD DATASET
+# ======================================================================
+# Loading the SMS dataset
+df_sms = pd.read_csv('/content/sms_spam_70_text_dataset.csv')
+
+# Automatically detect text and label columns
+text_col = 'message' if 'message' in df_sms.columns else ('text' if 'text' in df_sms.columns else df_sms.columns[1])
+label_col = 'label' if 'label' in df_sms.columns else df_sms.columns[0]
+
+# Split into training (70%) and testing (30%) sets
+X_train_raw, X_test_raw, y_train, y_test = train_test_split(
+    df_sms[text_col].astype(str).tolist(),
+    df_sms[label_col].tolist(),
+    test_size=0.3,
+    random_state=42,
+    stratify=df_sms[label_col]
+)
+
+class_names = sorted(list(set(y_train)))
+print(f"Dataset loaded with {len(class_names)} classes: {class_names}")
+print(f"Train samples: {len(X_train_raw)}, Test samples: {len(X_test_raw)}\n")
+
+# ======================================================================
+# 2. FEATURE EXTRACTION (TF-IDF)
+# ======================================================================
+vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
+X_train = vectorizer.fit_transform(X_train_raw)
+X_test = vectorizer.transform(X_test_raw)
+
+# ======================================================================
+# 3. MODEL IMPLEMENTATION & EVALUATION
+# ======================================================================
+models = {
+    'Decision Tree': DecisionTreeClassifier(random_state=42),
+    'KNN': KNeighborsClassifier(n_neighbors=5),
+    'SVM (Linear)': SVC(kernel='linear', random_state=42),
+    'Naïve Bayes': MultinomialNB()
+}
+
+results = {}
+confusion_matrices = {}
+
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
+    acc = accuracy_score(y_test, y_pred)
+    precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='weighted', zero_division=0)
+    
+    results[name] = {
+        'Accuracy': acc,
+        'Precision': precision,
+        'Recall': recall,
+        'F1-Score': f1
+    }
+    confusion_matrices[name] = confusion_matrix(y_test, y_pred)
+
+# Display overall metric results table
+df_results = pd.DataFrame(results).T
+print("--- Classifier Performance Metrics ---")
+display(df_results)
+
+# ======================================================================
+# 4. PLOT COMPARATIVE PERFORMANCE CHART
+# ======================================================================
+df_results.plot(kind='bar', figsize=(10, 5))
+plt.title('Performance Comparison of Classifiers (SMS Dataset)')
+plt.ylabel('Score')
+plt.xlabel('Classifier')
+plt.ylim(0.0, 1.05)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.legend(loc='lower right')
+plt.tight_layout()
+plt.show()
+
+# ======================================================================
+# 5. PLOT CONFUSION MATRICES
+# ======================================================================
+fig, axes = plt.subplots(2, 2, figsize=(11, 9))
+axes = axes.ravel()
+for idx, (name, cm) in enumerate(confusion_matrices.items()):
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names, ax=axes[idx])
+    axes[idx].set_title(f'Confusion Matrix - {name}')
+    axes[idx].set_ylabel('Actual')
+    axes[idx].set_xlabel('Predicted')
+plt.tight_layout()
+plt.show()
+
+# ======================================================================
+# 6. WHAT-IF EXPERIMENT (SVM KERNEL SHIFT)
+# ======================================================================
+print("\n--- Running What-If Experiment (SVM Linear vs RBF) ---")
+svm_rbf = SVC(kernel='rbf', random_state=42)
+svm_rbf.fit(X_train, y_train)
+y_pred_rbf = svm_rbf.predict(X_test)
+
+acc_rbf = accuracy_score(y_test, y_pred_rbf)
+precision_rbf, recall_rbf, f1_rbf, _ = precision_recall_fscore_support(y_test, y_pred_rbf, average='weighted', zero_division=0)
+
+what_if_df = pd.DataFrame({
+    'Linear Kernel (Baseline)': results['SVM (Linear)'],
+    'RBF Kernel (What-If)': {
+        'Accuracy': acc_rbf,
+        'Precision': precision_rbf,
+        'Recall': recall_rbf,
+        'F1-Score': f1_rbf
+    }
+}).T
+display(what_if_df)

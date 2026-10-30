@@ -20,8 +20,7 @@ This project performs SMS Spam Classification using Machine Learning algorithms.
 
 The graph compares Accuracy, Precision, Recall and F1-Score of all four classifiers.
 
-![Performance Comparison](classifier_comparison.png)
-
+![Performance Comparison](Classifier%20comparison.png)
 ## 5. Confusion Matrix
 
 The following confusion matrices show the classification results of all four algorithms.

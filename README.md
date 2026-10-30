@@ -27,15 +27,38 @@ The following confusion matrices show the classification results of all four alg
 
 ![Confusion Matrix](confusion%20matrix.png)
 
-## 6. Evaluation Metrics
-- Accuracy: Overall correct predictions.
-- Precision: Correctly predicted spam messages.
-- Recall: Actual spam messages correctly identified.
-- F1-Score: Harmonic mean of Precision and Recall.
+## 6. Classifier Performance Results
 
-## 7. Comparative Analysis
-SVM achieves the highest accuracy of approximately 81%, followed by Decision Tree, Naive Bayes and KNN.
+The following table compares the performance of four machine learning algorithms.
 
-## 8. Conclusion
-This project compares four Machine Learning algorithms for SMS Spam Classification. Based on the experimental results, SVM provides the best overall performance among the evaluated classifiers.
+| Classifier | Accuracy | Precision | Recall | F1-Score |
+|---|---:|---:|---:|---:|
+| Decision Tree | 0.761905 | 0.782313 | 0.761905 | 0.755182 |
+| KNN | 0.523810 | 0.761905 | 0.523810 | 0.404762 |
+| SVM | 0.809524 | 0.819597 | 0.809524 | 0.806878 |
+| Naive Bayes | 0.571429 | 0.603175 | 0.571429 | 0.551261 |
+
+## 7. What-If Experiment Results
+
+The experiment compares Linear Kernel and RBF Kernel using the SVM algorithm.
+
+| SVM Kernel | Accuracy | Precision | Recall | F1-Score |
+|---|---:|---:|---:|---:|
+| Linear Kernel (Baseline) | 0.809524 | 0.819597 | 0.809524 | 0.806878 |
+| RBF Kernel (What-If) | 0.809524 | 0.819597 | 0.809524 | 0.806878 |
+
+### Analysis
+
+- SVM achieved the highest accuracy of 80.95%.
+- Decision Tree achieved 76.19% accuracy.
+- Naive Bayes achieved 57.14% accuracy.
+- KNN achieved 52.38% accuracy.
+- Both Linear and RBF kernels produced identical results in this experiment.
+
+### Conclusion
+
+Based on the experimental results, SVM achieved the best classification performance among the four algorithms. The What-If experiment showed that changing the kernel from Linear to RBF did not improve the evaluation metrics on this test dataset.
+
+
+
 
